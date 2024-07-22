@@ -1,0 +1,5 @@
+<!-- LPS Barcode Report -->
+<li  class="~[if.gpv.repType=LPSBarcode]selected[/if]">
+    <a role="tab" aria-selected="~[if.gpv.repType=LPSBarcode]true[else]false[/if]" tabindex="~[if.gpv.repType=LPSBarcode]0[/if]" href="~[if.gpv.repType=LPSBarcode]#[else]/admin/reports/LPSBarcode.html[/if]">LPS Barcode</a>
+</li>
+<!-- LPS Barcode end -->
