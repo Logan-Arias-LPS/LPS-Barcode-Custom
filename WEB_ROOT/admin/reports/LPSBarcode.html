@@ -33,16 +33,27 @@ td#barcode {
 	var totalreports = 0;
 
 	$(function(){
-		clearError();
-		$("#reportresult").empty();
-		$("#reportresult").html('<span id="loader">Loading <img src="' +$("#busyimage").attr("src")+'" /></span>');
-		var settings = {"action":"getresults"};
-		$.get(reportdataURL, settings
-		)
-		.done(processReportResults)
-		.fail(function(xhr, status, error){
-			$('#loader').hide();
-			displayError("Report failed to load. Status Message: " +status);
+		$('#params_container').accordion({collapsible:true,autoHeight:false});
+		$('input:submit').button({label:"Submit"});
+		$('.datepicker').datepicker({
+			dateFormat: convertOracleDF('~[gpv:dateformat]')
+		});
+		$('#ui-datepicker-div').hide();//Bug in jQuery UI 1.8.9 causes datepicker div to be visible upon creation
+		$('#params').submit(function(){
+			clearError();
+			$("#reportresult").empty();
+			$("#reportresult").html('<span id="loader">Loading <img src="' +$("#busyimage").attr("src")+'" /></span>');
+			var settings = $('#params').serializeObject();
+
+			$.get(reportdataURL, settings
+			)
+			.done(processReportResults)
+			.fail(function(xhr, status, error){
+				$('#loader').hide();
+				displayError("Report failed to load. Status Message: " +status);
+			});
+
+			return false; //override regular form submission
 		});
 	});//end jquery.ready
 	  
@@ -53,14 +64,6 @@ td#barcode {
 			"bFilter": false,
 			"bJQueryUI": true
 		});
-	}
-	function redrawRowLabels(oSettings){
-	/* Need to redo the counters if filtered or sorted */
-		if ( oSettings.bSorted || oSettings.bFiltered ){
-			for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ ){
-				$('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
-			}
-		}
 	}
 	function displayError(msg){
 		$('#error_container').html('<div id="alertmsg" style="padding: 0pt 0.7em;" class="ui-state-error ui-corner-all"><p><span style="float: left; margin-right: 0.3em;" class="ui-icon ui-icon-alert"></span><strong>Alert: </strong>'+msg+'</p></div>').show();
@@ -82,6 +85,30 @@ Barcode List
 	
 <div id="reportcontent" class="rounded_block">
 <h2 class="noprint">Barcode List</h2>
+
+<!-- Begin report parameters-->
+<form class="noprint" name="params" id="params" method="GET" action="#" target="_new">
+<div id="params_container" class="noprint">
+	<h3><a href="#">Report Parameters</a></h3>
+	<div id="paramsinner_container">
+			<table border="0" cellspacing="0" cellpadding="4">
+			  <tr class="headerrow">
+				<td class="bold">Students</td>
+			  </tr>
+				<td><select name="s">
+      			  <option value='' selected="selected">All Students</option>
+				    <option value="cur">Current Selection (~[x:studsinset])</option>
+				</select></td>
+			  </tr>
+			</table>
+		<input type="hidden" name="dothisfor" value="selected" />
+		<input type="hidden" name="action" value="getresults" />
+		<input value="Submit" type="submit" />
+	</div>
+</div>
+</form>
+<!-- End report parameters-->
+<div id="error_container"></div>
 <div id="reportresult" class="rounded_block"></div><!-- End report result-->
 <p align="center">Report generated at ~[time] on ~[date]</p>
 </div>
@@ -91,8 +118,6 @@ Barcode List
 </body>
 </html>
 [else#pageaction]
-~[SetPostValue:dothisfor=selected]
-~[x:GetDoThisForStudents]
 <table border="0" cellspacing="0" cellpadding="4" align="center" id="sorttedtable">
 <thead>
 	<tr class="headerRow" align="left">
@@ -106,6 +131,7 @@ Barcode List
 </thead>
 
 <tbody>
+~[x:GetDoThisForStudents]
 ~[tlist_sql;select st.student_number,
 st.last_name, 
 st.first_name,
@@ -115,8 +141,8 @@ st.student_number as Barcode
 from students st
 left join U_def_ext_students US ON st.dcid=us.studentsdcid
 LEFT OUTER JOIN StudentCoreFields ON st.dcid = StudentCoreFields.studentsdcid
-where st.enroll_status in (0,-1) and st.schoolid=~(curschoolid)
-AND st.ID in (~[f.table_info;table=students;dothisfor=currentsel;fn=value;field=id;delim=cma]-1)
+where st.enroll_status in (0,-1)
+~[if#cursel.~[gpv:s]=cur]AND st.ID in (~[f.table_info;table=students;dothisfor=currentsel;fn=value;field=id;delim=cma]-1)[/if#cursel]
 
 ;]
 	<tr class="oddrow">
