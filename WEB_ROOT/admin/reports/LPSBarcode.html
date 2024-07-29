@@ -6,11 +6,6 @@
 <title>Barcode List</title>
 <!--[CRM END]-->
 <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Libre%20Barcode%2039' type="text/css">
-<style>
-td#barcode {
-    font-family: 'Libre Barcode 39';font-size: 24px;
-}
-</style>
 <meta name="author" content="Logan.Arias@lawrence.k12.ma.us" />
 <meta name="description" content="" />
 <meta name="version" content="1.0.0" />
@@ -23,6 +18,22 @@ td#barcode {
 ~[x:insertfile;/scripts/custom-jquery-1.0.html]
 ~[x:insertfile;/scripts/custom-datatables-1.0.html]
 ~[x:insertfile;/admin/includes/template/reports-commonscripts.html]
+<style>
+table.display td#barcode {
+    font-family: 'Libre Barcode 39';
+    font-size: 24px;
+    text-align: right;
+}
+table.display td#SN {
+    text-align: center;
+}
+table.display td {
+    padding: 8px 10px;
+}
+table.display th {
+    text-align: center;
+}
+</style>
 <script type="text/javascript">
 (function($){
 	var reportdataURL ='/~[self]';
@@ -119,8 +130,8 @@ Barcode List
 <thead>
 	<tr class="headerRow" align="left">
 <th>LASID</th>
-<th>FIRSTNAME</th>
-<th>LASTNAME</th>
+<th>First Name</th>
+<th>Last Name</th>
 <th>Teacher Name</th>
 <th>Barcode</th>
 
@@ -130,8 +141,8 @@ Barcode List
 <tbody>
 ~[x:GetDoThisForStudents]
 ~[tlist_sql;select st.student_number,
-st.last_name, 
 st.first_name,
+st.last_name, 
 US.homeroom_teacher,
 st.student_number as Barcode
 
@@ -142,11 +153,11 @@ where st.enroll_status in (0,-1)
 ~[if#cursel.~[gpv:s]=cur]AND st.ID in (~[f.table_info;table=students;dothisfor=currentsel;fn=value;field=id;delim=cma]-1)[/if#cursel]
 
 ;]
-	<tr class="oddrow">
-   <td>~(st.student_number)</td>
-<td>~(st.last_name)</td>
-<td>~(st.first_name)</td>
-<td>~(US.homeroom_teacher)</td>
+<tr class="oddrow">
+<td id="SN">~(st.student_number)</td>
+<td id="FN">~(st.first_name)</td>
+<td id="LN">~(st.last_name)</td>
+<td id="HRT">~(US.homeroom_teacher)</td>
 <td id="barcode">~(Barcode)</td>
 </tr>
 [/tlist_sql]
