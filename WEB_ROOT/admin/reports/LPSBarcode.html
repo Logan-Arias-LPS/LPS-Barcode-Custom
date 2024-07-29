@@ -104,6 +104,8 @@ Barcode List
 </body>
 </html>
 [else#pageaction]
+~[SetPostValue:dothisfor=selected]
+~[x:GetDoThisForStudents]
 <table border="0" cellspacing="0" cellpadding="4" align="center" id="sorttedtable">
 <thead>
 	<tr class="headerRow" align="left">
@@ -127,6 +129,7 @@ from students st
 left join U_def_ext_students US ON st.dcid=us.studentsdcid
 LEFT OUTER JOIN StudentCoreFields ON st.dcid = StudentCoreFields.studentsdcid
 where st.enroll_status in (0,-1) and st.schoolid=~(curschoolid)
+AND st.ID in (~[f.table_info;table=students;dothisfor=currentsel;fn=value;field=id;delim=cma]-1)
 
 ;]
 	<tr class="oddrow">
